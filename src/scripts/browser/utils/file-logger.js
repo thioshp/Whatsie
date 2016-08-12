@@ -1,20 +1,19 @@
 import stripAnsi from 'strip-ansi';
-import mkdirp from 'mkdirp';
+import fs from 'fs-extra-promise';
+import {app} from 'electron';
 import util from 'util';
 import path from 'path';
-import app from 'app';
-import fs from 'fs';
 import os from 'os';
 
 let fileLogStream = null;
 let fileLogIsGettingReady = false;
 let fileLogIsReady = false;
 
-function isFileLogEnabled() {
+function isFileLogEnabled () {
   return global.options.debug && !global.options.mas;
 }
 
-function initFileLogging() {
+function initFileLogging () {
   if (fileLogIsGettingReady) {
     return;
   }
@@ -22,28 +21,34 @@ function initFileLogging() {
 
   try {
     const fileLogsDir = path.join(app.getPath('userData'), 'logs');
-    mkdirp.sync(fileLogsDir);
+    fs.mkdirsSync(fileLogsDir);
 
-    const fileLogPath = path.join(fileLogsDir, Date.now() + '.log');
+    const fileLogPath = path.join(fileLogsDir, Date.now() + '.txt');
     fileLogStream = fs.createWriteStream(null, {
       fd: fs.openSync(fileLogPath, 'a')
     });
+    global.__debug_file_log_path = fileLogPath;
 
     process.on('exit', (code) => {
       fileLogStream.end('process exited with code ' + code + os.EOL);
       fileLogStream = null;
     });
 
-    log(`saving logs to "${fileLogPath}"`);
+    if (global.options.consoleLogs) {
+      console.log(`saving logs to "${fileLogPath}"`);
+    }
+
     fileLogIsReady = true;
     fileLogIsGettingReady = false;
   } catch (err) {
     fileLogIsGettingReady = false;
-    console.error('logger error:', err);
+    if (global.options.consoleLogs) {
+      console.error('logger error:', err);
+    }
   }
 }
 
-export function writeLog() {
+export function writeLog () {
   if (isFileLogEnabled() && !fileLogIsReady) {
     initFileLogging();
   }

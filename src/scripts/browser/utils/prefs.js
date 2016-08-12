@@ -1,23 +1,23 @@
-import jsonfile from 'jsonfile';
+import fs from 'fs-extra-promise';
+import {app} from 'electron';
 import path from 'path';
-import app from 'app';
 
 import defaults from 'browser/utils/prefs-defaults';
 
 let prefsPath = null;
 let data = null;
 
-function ensureDataLoaded() {
+function ensureDataLoaded () {
   if (!prefsPath) {
     prefsPath = path.join(app.getPath('userData'), 'prefs.json');
   }
 
   if (!data) {
     try {
-      data = jsonfile.readFileSync(prefsPath) || {};
+      data = fs.readJsonSync(prefsPath) || {};
       log('prefs data restored');
     } catch (err) {
-      if (err.code == 'ENOENT') {
+      if (err.code === 'ENOENT') {
         // ignored
       } else {
         logError(err);
@@ -31,11 +31,11 @@ function ensureDataLoaded() {
  * Save the given (key, value) pair asynchronously.
  * Returns immediately and logs errors.
  */
-function set(key, value) {
+function set (key, value) {
   ensureDataLoaded();
   data[key] = value;
 
-  jsonfile.writeFile(prefsPath, data, function(err) {
+  fs.outputJson(prefsPath, data, function (err) {
     if (err) {
       logError(err);
     } else {
@@ -48,12 +48,12 @@ function set(key, value) {
  * Save the given (key, value) pair synchronously.
  * Returns immediately and logs errors.
  */
-function setSync(key, value) {
+function setSync (key, value) {
   ensureDataLoaded();
   data[key] = value;
 
   try {
-    jsonfile.writeFileSync(prefsPath, data);
+    fs.outputJsonSync(prefsPath, data);
     log('saved', key, '=', JSON.stringify(value));
   } catch (err) {
     logError(err);
@@ -63,13 +63,13 @@ function setSync(key, value) {
 /**
  * Retrieve the value synchronously.
  */
-function get(key) {
+function get (key) {
   ensureDataLoaded();
   const value = data[key];
   if (value === undefined) {
     const defaultValue = getDefault(key);
     if (defaultValue === undefined) {
-      logFatal('default value for', key, 'is undefined');
+      logFatal(new Error('default value for key ' + key + ' is undefined'));
     }
     return defaultValue;
   }
@@ -79,7 +79,7 @@ function get(key) {
 /**
  * Retrieve all the prefs.
  */
-function getAll() {
+function getAll () {
   ensureDataLoaded();
   return data;
 }
@@ -87,18 +87,18 @@ function getAll() {
 /**
  * Retrieve the default value.
  */
-function getDefault(key) {
+function getDefault (key) {
   return defaults.get(key);
 }
 
 /**
  * Remove the given key asynchronously.
  */
-function unset(key) {
+function unset (key) {
   ensureDataLoaded();
   delete data[key];
 
-  jsonfile.writeFile(prefsPath, data, function(err) {
+  fs.outputJson(prefsPath, data, function (err) {
     if (err) {
       logError(err);
     } else {
@@ -110,12 +110,12 @@ function unset(key) {
 /**
  * Remove the given key synchronously.
  */
-function unsetSync(key) {
+function unsetSync (key) {
   ensureDataLoaded();
   delete data[key];
 
   try {
-    jsonfile.writeFileSync(prefsPath, data);
+    fs.outputJsonSync(prefsPath, data);
     log('unset', key);
   } catch (err) {
     logError(err);
@@ -125,11 +125,11 @@ function unsetSync(key) {
 /**
  * Remove all the keys and their values.
  */
-function clear() {
+function clear () {
   ensureDataLoaded();
   data = {};
 
-  jsonfile.writeFile(prefsPath, data, function(err) {
+  fs.outputJson(prefsPath, data, function (err) {
     if (err) {
       logError(err);
     } else {

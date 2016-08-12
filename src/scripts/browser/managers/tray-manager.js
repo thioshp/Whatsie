@@ -1,6 +1,5 @@
 import EventEmitter from 'events';
-import Menu from 'menu';
-import Tray from 'tray';
+import {Menu, Tray} from 'electron';
 
 import filePaths from 'common/utils/file-paths';
 import platform from 'common/utils/platform';
@@ -9,7 +8,7 @@ import prefs from 'browser/utils/prefs';
 
 class TrayManager extends EventEmitter {
 
-  constructor(mainWindowManager, notifManager) {
+  constructor (mainWindowManager, notifManager) {
     super();
 
     this.mainWindowManager = mainWindowManager;
@@ -24,7 +23,7 @@ class TrayManager extends EventEmitter {
   /**
    * Create and set the default menu.
    */
-  create() {
+  create () {
     if (this.tray) {
       return;
     }
@@ -38,11 +37,9 @@ class TrayManager extends EventEmitter {
         this.tray.setTitle(this.notifManager.unreadCount);
       }
     } else {
-      if (this.notifManager.unreadCount) {
-        this.tray = new Tray(filePaths.getImagePath('trayAlert.png'));
-      } else {
-        this.tray = new Tray(filePaths.getImagePath('tray.png'));
-      }
+      const imgExt = platform.isWindows ? 'ico' : 'png';
+      const iconName = this.notifManager.unreadCount ? 'trayAlert' : 'tray';
+      this.tray = new Tray(filePaths.getImagePath(iconName + '.' + imgExt));
     }
 
     this.menu = Menu.buildFromTemplate(template());
@@ -56,7 +53,7 @@ class TrayManager extends EventEmitter {
   /**
    * Listen for tray events.
    */
-  setEventListeners() {
+  setEventListeners () {
     if (this.tray) {
       this.tray.on('click', ::this.onClick);
       this.tray.on('right-click', ::this.onRightClick);
@@ -66,7 +63,7 @@ class TrayManager extends EventEmitter {
   /**
    * Called when the 'click' event is emitted on the tray menu.
    */
-  onClick() {
+  onClick () {
     // Show the main window
     log('tray click');
     if (this.mainWindowManager) {
@@ -80,7 +77,7 @@ class TrayManager extends EventEmitter {
   /**
    * Called when the 'right-click' event is emitted on the tray menu.
    */
-  onRightClick() {
+  onRightClick () {
     // Show the context menu
     log('tray right-click');
     this.tray.popUpContextMenu(this.menu);
@@ -89,7 +86,7 @@ class TrayManager extends EventEmitter {
   /**
    * Hide and destroy the tray menu.
    */
-  destroy() {
+  destroy () {
     if (this.tray) {
       this.tray.destroy();
     }
@@ -100,7 +97,7 @@ class TrayManager extends EventEmitter {
   /**
    * Called when the unread count changes.
    */
-  unreadCountUpdated(count) {
+  unreadCountUpdated (count) {
     if (!this.tray) {
       return;
     }
@@ -108,11 +105,9 @@ class TrayManager extends EventEmitter {
     if (platform.isDarwin) {
       this.tray.setTitle(count);
     } else {
-      if (count) {
-        this.tray.setImage(filePaths.getImagePath('trayAlert.png'));
-      } else {
-        this.tray.setImage(filePaths.getImagePath('tray.png'));
-      }
+      const imgExt = platform.isWindows ? 'ico' : 'png';
+      const iconName = count ? 'trayAlert' : 'tray';
+      this.tray.setImage(filePaths.getImagePath(iconName + '.' + imgExt));
     }
   }
 

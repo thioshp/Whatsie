@@ -1,5 +1,4 @@
 gulp = require 'gulp'
-livereload = require 'gulp-livereload'
 manifest = require '../src/package.json'
 {platform, applySpawn} = require './utils'
 args = require './args'
@@ -14,9 +13,6 @@ args = require './args'
   [dist, runnablePath] = item
 
   gulp.task 'watch:' + dist, ['build:' + dist], ->
-    # Start livereload
-    livereload.listen()
-
     # Launch the app
     console.log 'initial spawn' if args.verbose
     applySpawn(runnablePath, [], {stdio: 'inherit'})()
@@ -24,10 +20,13 @@ args = require './args'
     # Watch files
     gulp.watch './src/styles/**/*', ['compile:' + dist + ':styles']
     gulp.watch './src/themes/**/*', ['compile:' + dist + ':themes']
+    gulp.watch './src/images/**/*', ['restart:compile:' + dist + ':images']
+    gulp.watch './src/.loggerignore', ['restart:compile:' + dist + ':scripts']
     gulp.watch './src/scripts/browser/**/*', ['restart:compile:' + dist + ':scripts']
     gulp.watch './src/scripts/common/**/*', ['restart:compile:' + dist + ':scripts']
     gulp.watch './src/scripts/renderer/**/*', ['compile:' + dist + ':scripts']
     gulp.watch './src/html/**/*', ['compile:' + dist + ':html']
+    gulp.watch './src/package.json', ['restart:compile:' + dist + ':package']
 
 # Watch for the current platform by default
 gulp.task 'watch', ['watch:' + platform()]

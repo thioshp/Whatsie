@@ -1,11 +1,8 @@
-# Whatsie (beta)
+# Whatsie
 
-[![OS X build](https://travis-ci.org/Aluxian/Whatsie.svg?branch=deploy)](https://travis-ci.org/Aluxian/Whatsie)
-[![Windows build](https://ci.appveyor.com/api/projects/status/6vborc92ob25kqe0/branch/deploy?svg=true)](https://ci.appveyor.com/project/Aluxian/Whatsie)
-[![Linux builds](https://circleci.com/gh/Aluxian/Whatsie/tree/deploy.svg?style=shield)](https://circleci.com/gh/Aluxian/Whatsie)
-[![Code Climate](https://codeclimate.com/github/Aluxian/Whatsie/badges/gpa.svg)](https://codeclimate.com/github/Aluxian/Whatsie)
-[![Build dependencies](https://david-dm.org/Aluxian/Whatsie/status.svg)](https://david-dm.org/Aluxian/Whatsie)
-[![App dependencies](https://david-dm.org/Aluxian/Whatsie/status.svg?path=src)](https://david-dm.org/Aluxian/Whatsie?path=src)
+[![OS X build](https://travis-ci.org/Aluxian/Whatsie.svg?branch=staging)](https://travis-ci.org/Aluxian/Whatsie)
+[![Windows build](https://ci.appveyor.com/api/projects/status/6vborc92ob25kqe0/branch/staging?svg=true)](https://ci.appveyor.com/project/Aluxian/Whatsie)
+[![Linux builds](https://circleci.com/gh/Aluxian/Whatsie/tree/staging.svg?style=shield)](https://circleci.com/gh/Aluxian/Whatsie)
 [![Downloads total](https://updates.whatsie.chat/badge/downloads.svg)](https://updates.whatsie.chat/stats)
 [![Services status](https://img.shields.io/badge/services-status-blue.svg)](https://status.whatsie.chat/)
 [![HuBoard task board](https://img.shields.io/badge/hu-board-7965cc.svg)](https://huboard.com/Aluxian/Whatsie)
@@ -30,6 +27,14 @@ Whatsie is still in beta, so some features might not work properly. Bug reports 
 
 ## How to install
 
+**Note:** If you download from the [releases page](https://github.com/Aluxian/Whatsie/releases), be careful what version you pick. Releases that end with `-beta` are beta releases, the ones that end with `-dev` are development releases, and the rest are stable. If you're unsure which to pick, opt for stable. Once you download the app, you'll be able to switch to another channel from the menu.
+
+- **dev:** these releases get the newest and hottest features, but they are less tested and might break things
+- **beta:** these releases are the right balance between getting new features early while staying away from nasty bugs
+- **stable:** these releases are more thoroughly tested; they receive new features later, but there's a lower chance that things will go wrong
+
+If you want to help me make Whatsie better, I recommend `dev` or `beta`. Let's go!
+
 ### OS X
 
 1. Download [whatsie-x.x.x-osx.dmg][LR] or [whatsie-x.x.x-osx.zip][LR]
@@ -38,7 +43,7 @@ Whatsie is still in beta, so some features might not work properly. Bug reports 
 
 ### Windows
 
-*Installer:*
+*Installer (recommended):*
 
 1. Download [whatsie-x.x.x-win32-setup.exe][LR]
 2. Run the installer, wait until it finishes
@@ -47,23 +52,31 @@ Whatsie is still in beta, so some features might not work properly. Bug reports 
 *Portable:*
 
 1. Download [whatsie-x.x.x-win32-portable.zip][LR]
-2. Extract the zip and run the app
+2. Extract the zip wherever you want (e.g. a flash drive) and run the app from there
 3. Done! The app will NOT update automatically, but you can still check for updates
 
 ### Linux
 
-*Ubuntu, Debian (deb package):*
+*Ubuntu, Debian 8+ (deb package):*
 
 1. Download [whatsie-x.x.x-linux-arch.deb][LR]
 2. Double click and install, or run `dpkg -i whatsie-x.x.x-linux-arch.deb` in the terminal
-3. Done! The app will NOT update automatically, but you can still check for updates
+3. Start the app with your app launcher or by running `whatsie` in a terminal
+4. Done! The app will NOT update automatically, but you can still check for updates
 
-You can also use aptitude:
+You can also use `apt-get` (recommended):
 
 ```
+# Download my gpg key to make sure the deb you download is correct
 gpg --keyserver pool.sks-keyservers.net --recv-keys 1537994D
 gpg --export --armor 1537994D | sudo apt-key add -
-echo "deb https://dl.bintray.com/aluxian/deb stable main" | sudo tee -a /etc/apt/sources.list
+
+# Add my repository to your sources list (skip if you've done this already)
+# Replace <channel> with stable, beta or dev (pick stable if you're unsure)
+echo "deb https://dl.bintray.com/aluxian/deb <channel> main" |
+  sudo tee -a /etc/apt/sources.list.d/aluxian.list
+
+# Install Whatsie
 sudo apt-get update
 sudo apt-get install whatsie
 ```
@@ -72,12 +85,16 @@ sudo apt-get install whatsie
 
 1. Download [whatsie-x.x.x-linux-arch.rpm][LR]
 2. Double click and install, or run `rpm -ivh whatsie-x.x.x-linux-arch.rpm` in the terminal
-3. Done! The app will NOT update automatically, but you can still check for updates
+3. Start the app with your app launcher or by running `whatsie` in a terminal
+4. Done! The app will NOT update automatically, but you can still check for updates
 
-You can also use yum:
+You can also use `yum` (recommended):
 
 ```
+# Add my repository to your repos list (skip if you've done this already)
 sudo wget https://bintray.com/aluxian/rpm/rpm -O /etc/yum.repos.d/bintray-aluxian-rpm.repo
+
+# Install Whatsie
 sudo yum install whatsie.i386     # for 32-bit distros
 sudo yum install whatsie.x86_64   # for 64-bit distros
 ```
@@ -85,9 +102,12 @@ sudo yum install whatsie.x86_64   # for 64-bit distros
 *Arch Linux (AUR):*
 
 1. Simply run `yaourt -S whatsie`
-2. Done! The app will NOT update automatically, but you can still check for updates
+3. Start the app with your app launcher or by running `whatsie` in a terminal
+3. Done! The app will NOT update automatically, but you can still check for updates
 
 Repository URL: https://aur.archlinux.org/packages/whatsie/
+
+[LR]: https://github.com/Aluxian/Whatsie/releases
 
 # For Developers
 
@@ -231,4 +251,11 @@ gulp pack:<linux32|linux64>:<deb|rpm> [--prod]
 
 Make sure you've installed [fpm](https://github.com/jordansissel/fpm).
 
-[LR]: https://github.com/Aluxian/Whatsie/releases/latest
+### Release flow
+
+`develop -> staging -> deploy -> master`
+
+1. All work is done on branch `develop`. Every push to `develop` will make the CIs run code linting and other checks.
+2. In order to build, push to `staging`. Every push to `staging` will make the CIs build the app and upload it to Bintray at [aluxian/artifacts](https://dl.bintray.com/aluxian/artifacts/staging/), available for testing.
+3. After a version is tested and is ready for release, push it to `deploy`. This will rebuild the app and upload it to GitHub, Bintray and other repositories.
+4. Now, the code is ready to be merged into `master`.

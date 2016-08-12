@@ -161,7 +161,7 @@ gulp.task 'pack:darwin64:zip', ['build:darwin64'], (done) ->
 [32, 64].forEach (arch) ->
   ['deb', 'rpm'].forEach (target) ->
     gulp.task 'pack:linux' + arch + ':' + target, ['build:linux' + arch, 'clean:dist:linux' + arch], (done) ->
-      if arch == 32
+      if arch is 32
         archName = 'i386'
       else if target is 'deb'
         archName = 'amd64'
@@ -169,7 +169,7 @@ gulp.task 'pack:darwin64:zip', ['build:darwin64'], (done) ->
         archName = 'x86_64'
 
       depsList = []
-      if target == 'deb'
+      if target is 'deb'
         depsList = [
           'libappindicator1 | libappindicator | libappindicator-gtk3'
           'gconf2'
@@ -237,7 +237,7 @@ gulp.task 'pack:darwin64:zip', ['build:darwin64'], (done) ->
           '--maintainer', manifest.author
           '--vendor', manifest.authorName
           '--version', manifest.version
-          '--iteration', process.env.CIRCLE_BUILD_NUM || '1'
+          '--iteration', process.env.CIRCLE_BUILD_NUM or '1'
           '--package', './dist/' + manifest.name + '-VERSION-linux-ARCH.' + target
           '-C', './build/linux' + arch
           '.'
@@ -273,9 +273,6 @@ gulp.task 'pack:darwin64:zip', ['build:darwin64'], (done) ->
 
         # Remove leftovers
         applyPromise del, './build/linux' + arch + '/opt/' + manifest.name + '/resources/app'
-
-        # Create a file with the target name
-        async.apply fs.writeFile, './build/linux' + arch + '/opt/' + manifest.name + '/pkgtarget', target
 
         # Package the app
         applySpawn 'fpm', fpmArgs
@@ -323,13 +320,15 @@ gulp.task 'pack:win32:installer', ['build:win32', 'clean:dist:win32'], (done) ->
         process.env.SIGN_WIN_CERTIFICATE_PASSWORD
       ]
 
-      remoteReleasesUrl = manifest.updater.urls.win32.replace /%CHANNEL%/g, 'dev'
+      remoteReleasesUrl = manifest.updater.urls.win32
+        .replace /{{& SQUIRREL_UPDATES_URL }}/g, process.env.SQUIRREL_UPDATES_URL
+        .replace /%CHANNEL%/g, 'dev'
       releasesUrl = remoteReleasesUrl + '/RELEASES'
 
       request {url: releasesUrl}, (err, res, body) ->
-        if err || res.statusCode < 200 || res.statusCode >= 400
+        if err or not res or res.statusCode < 200 or res.statusCode >= 400
           console.log 'Creating installer without remote releases url', releasesUrl, 'because of',
-            'error', err, 'statusCode', res.statusCode, 'body', res.body
+            'error', err, 'statusCode', res and res.statusCode, 'body', res and res.body
           remoteReleasesUrl = undefined
 
         winInstaller
@@ -339,6 +338,8 @@ gulp.task 'pack:win32:installer', ['build:win32', 'clean:dist:win32'], (done) ->
           signWithParams: signParams.join ' '
           setupIcon: './build/resources/win/setup.ico'
           iconUrl: mainManifest.icon.url
+          description: manifest.productName
+          authors: manifest.authorName
           remoteReleases: remoteReleasesUrl
           copyright: manifest.copyright
           setupExe: manifest.name + '-' + manifest.version + '-win32-setup.exe'
@@ -382,7 +383,7 @@ gulp.task 'pack:win32:portable', ['build:win32', 'clean:dist:win32'], (done) ->
 
     # Sign the exe
     (callback) ->
-      cmd = process.env.SIGNTOOL_PATH || 'signtool'
+      cmd = process.env.SIGNTOOL_PATH or 'signtool'
       args = [
         'sign'
         '/t'
@@ -404,7 +405,7 @@ gulp.task 'pack:win32:portable', ['build:win32', 'clean:dist:win32'], (done) ->
   ], done
 
 # Pack for the current platform by default
-if process.platform == 'win32'
+if process.platform is 'win32'
   gulp.task 'pack', ['pack:' + platform() + ':installer']
 else
   gulp.task 'pack', ['pack:' + platform()]

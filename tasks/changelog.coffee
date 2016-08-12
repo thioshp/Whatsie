@@ -3,58 +3,97 @@ moment = require 'moment'
 fs = require 'fs-extra-promise'
 
 manifest = require '../src/package.json'
+mainManifest = require '../package.json'
 changelogJson = require '../CHANGELOG.json'
 
-gulp.task 'changelog:deb', () ->
+gulp.task 'changelog:deb', ->
   fs.outputFileAsync './build/changelogs/deb.txt',
     changelogJson
       .map (release) ->
-        log = release.changes
-          .map (line) -> ' * ' + line
-          .join '\n'
+        if Array.isArray release.changes
+          log = release.changes
+            .map (line) -> '  - ' + line
+            .join '\n'
+        else
+          log = []
+          for key in Object.keys(release.changes)
+            logs = release.changes[key]
+              .map (line) -> '    - ' + line
+              .join '\n'
+            log.push '  * ' + key
+            log.push logs
+          log = log.join '\n'
 
         parsedDate = new Date(release.releasedAt)
         date = moment(parsedDate).format('ddd, DD MMM YYYY HH:mm:ss ZZ')
 
-        return manifest.name + ' (' + release.version + ') ' +
-          release.distribution + '; urgency=' + release.urgency +
-          '\n\n' + log + '\n\n' +
-          ' -- ' + manifest.author + '  ' + date
+        return manifest.name + ' (' + release.version + ') ' + release.channel +
+          '; urgency=' + release.urgency + '\n\n' + log + '\n\n' +
+          '-- ' + manifest.author + '  ' + date
       .join '\n\n'
 
-gulp.task 'changelog:rpm', () ->
+gulp.task 'changelog:rpm', ->
   fs.outputFileAsync './build/changelogs/rpm.txt',
     changelogJson
       .map (release) ->
-        log = release.changes
-          .map (line) -> '- ' + line
-          .join '\n'
+        if Array.isArray release.changes
+          log = release.changes
+            .map (line) -> '- ' + line
+            .join '\n'
+        else
+          log = []
+          for key in Object.keys(release.changes)
+            logs = release.changes[key]
+              .map (line) -> '- ' + key + ': ' + line
+              .join '\n'
+            log.push logs
+          log = log.join '\n'
 
         parsedDate = new Date(release.releasedAt)
         date = moment(parsedDate).format('ddd MMM DD YYYY')
 
-        return '* ' + date + ' ' + manifest.author + ' ' + release.version + '\n' + log
+        channelSuffix = ''
+        if release.channel isnt 'stable'
+          channelSuffix = '-' + release.channel
+
+        return '* ' + date + ' ' + manifest.author + ' ' + release.version + channelSuffix + '\n' + log
       .join '\n\n'
 
-gulp.task 'changelog:md', () ->
+gulp.task 'changelog:md', ->
   changelog = changelogJson
     .map (release, index) ->
-      log = release.changes
-        .map (line) -> '- ' + line
-        .join '\n'
+      if Array.isArray release.changes
+        log = release.changes
+          .map (line) -> '- ' + line
+          .join '\n'
+      else
+        log = []
+        for key in Object.keys(release.changes)
+          logs = release.changes[key]
+            .map (line) -> '- ' + line
+            .join '\n'
+          log.push '\n**' + key + '**\n'
+          log.push logs
+        log = log.join '\n'
 
       parsedDate = new Date(release.releasedAt)
       date = moment(parsedDate).format('YYYY-DD-MM')
 
+      repoUrl = mainManifest.repository.url.replace '.git', ''
+
       fullChangelog = ''
       if index < changelogJson.length - 1
-        fullChangelog = '[Full Changelog](https://github.com/Aluxian/Whatsie/compare/v' +
-          changelogJson[index+1].version.split('-')[0] + '...v' + release.version.split('-')[0] + ') &bull; '
+        fullChangelog = '[Full Changelog](' + repoUrl + '/compare/v' +
+          changelogJson[index+1].version + '...v' + release.version + ') &bull; '
 
-      download = '[Download](https://github.com/Aluxian/Whatsie/releases/tag/v' + release.version.split('-')[0] + ')'
+      download = '[Download](' + repoUrl + '/releases/tag/v' + release.version + ')'
 
-      return '## [' + release.version + '](https://github.com/Aluxian/Whatsie/tree/v' +
-          release.version.split('-')[0] + ') (' + date + ')\n\n' + fullChangelog + download + '\n\n' + log
+      channelSuffix = ''
+      if release.channel isnt 'stable'
+        channelSuffix = '-' + release.channel
+
+      return '## [' + release.version + channelSuffix + '](' + repoUrl + '/tree/v' +
+          release.version + ') (' + date + ')\n\n' + fullChangelog + download + '\n' + log
     .join '\n\n'
   changelog += '\n'
   fs.outputFileAsync './CHANGELOG.md', changelog

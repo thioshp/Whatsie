@@ -8,17 +8,17 @@ export default {
   label: '&Help',
   role: 'help',
   submenu: [{
-    label: 'Ra&ffle Code',
+    label: 'Frequently Asked &Questions',
     click: $.all(
-      $.openRaffleDialog(),
+      $.openUrl('https://whatsie.chat/#faq'),
       $.analytics.trackEvent(
         eventCategories['Menu'],
-        eventActions['Open Dialog'],
-        eventNames['Raffle Code Dialog']
+        eventActions['Open Link'],
+        eventNames['FAQ Link']
       )
     )
   }, {
-    label: 'Gitter &Chat',
+    label: '&Chat on Gitter',
     click: $.all(
       $.openUrl('https://gitter.im/Aluxian/Whatsie'),
       $.analytics.trackEvent(
@@ -86,7 +86,7 @@ export default {
   }, {
     label: 'Donate &PayPal',
     click: $.all(
-      $.openUrl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4YVCUBK2QJKBL'),
+      $.openUrl('https://short.aluxian.com/donatewhatsiepaypal'),
       $.analytics.trackEvent(
         eventCategories['Menu'],
         eventActions['Open Link'],
@@ -96,7 +96,7 @@ export default {
   }, {
     label: 'Donate &Bitcoin',
     click: $.all(
-      $.openUrl('https://www.coinbase.com/Aluxian'),
+      $.openUrl('https://short.aluxian.com/donatewhatsiebitcoin'),
       $.analytics.trackEvent(
         eventCategories['Menu'],
         eventActions['Open Link'],

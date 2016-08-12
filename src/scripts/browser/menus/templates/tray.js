@@ -2,6 +2,11 @@ import platform from 'common/utils/platform';
 import $ from 'browser/menus/expressions';
 
 export default [{
+  label: 'Reset Window',
+  click: $.resetWindow()
+}, {
+  type: 'separator'
+}, {
   id: 'show-tray',
   type: 'checkbox',
   label: 'Show in Menu Bar',
@@ -10,7 +15,7 @@ export default [{
   click: $.all(
     $.showInTray($.key('checked')),
     $.updateSibling('show-dock', 'enabled', $.key('checked')),
-    $.updateMenuItem('main', 'show-tray')($.key('checked'))(checked => $.all(
+    $.updateMenuItem('main', 'show-tray')($.key('checked'))((checked) => $.all(
       $.setLocal('checked', $.val(checked)),
       $.updateSibling('show-dock', 'enabled', $.val(checked))
     )),
@@ -25,7 +30,7 @@ export default [{
   click: $.all(
     $.showInDock($.key('checked')),
     $.updateSibling('show-tray', 'enabled', $.key('checked')),
-    $.updateMenuItem('main', 'show-dock')($.key('checked'))(checked => $.all(
+    $.updateMenuItem('main', 'show-dock')($.key('checked'))((checked) => $.all(
       $.setLocal('checked', $.val(checked)),
       $.updateSibling('show-tray', 'enabled', $.val(checked))
     )),

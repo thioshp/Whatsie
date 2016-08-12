@@ -1,39 +1,34 @@
 import Plist from 'launchd.plist';
 import fs from 'fs-extra-promise';
+import {app} from 'electron';
 import path from 'path';
-import app from 'app';
 
 import BaseAutoLauncher from 'browser/components/auto-launcher/base';
+import files from 'common/utils/files';
+
+const plistName = global.manifest.darwin.bundleId + '.plist';
+const plistPath = path.join(app.getPath('home'), 'Library', 'LaunchAgents', plistName);
 
 class DarwinAutoLauncher extends BaseAutoLauncher {
 
-  async enable() {
-    log('writing login plist');
-    await fs.writeFileAsync(this.getPlistPath(), this.buildPlist(), 'utf8');
+  async enable () {
+    log('enabling darwin auto-launch');
+    log('creating login plist');
+    await files.replaceFile(plistPath, () => fs.writeFileAsync(plistPath, this.buildPlist(), 'utf8'));
   }
 
-  async disable() {
+  async disable () {
+    log('disabling linux auto-launch');
     log('removing login plist');
-    await fs.unlinkAsync(this.getPlistPath());
+    await fs.removeAsync(plistPath);
   }
 
-  async isEnabled() {
-    log('checking login plist access');
-    try {
-      await fs.accessAsync(this.getPlistPath(), fs.R_OK | fs.W_OK);
-    } catch (err) {
-      log('login plist access error', err);
-      return false;
-    }
-    return true;
+  async isEnabled () {
+    log('checking darwin auto-launch');
+    await files.isFileExists(plistPath);
   }
 
-  getPlistPath() {
-    const plistName = global.manifest.darwin.bundleId + '.plist';
-    return path.join(app.getPath('home'), 'Library', 'LaunchAgents', plistName);
-  }
-
-  buildPlist() {
+  buildPlist () {
     const plist = new Plist();
     plist.setLabel(global.manifest.darwin.bundleId);
     plist.setProgram(app.getPath('exe'));

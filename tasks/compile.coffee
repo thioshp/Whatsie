@@ -1,4 +1,5 @@
 beeper = require 'beeper'
+fs = require 'fs'
 
 gulp = require 'gulp'
 plumber = require 'gulp-plumber'
@@ -12,8 +13,6 @@ less = require 'gulp-less'
 babel = require 'gulp-babel'
 gif = require 'gulp-if'
 
-embedlr = require 'gulp-embedlr'
-livereload = require 'gulp-livereload'
 {platform} = require './utils'
 manifest = require '../src/package.json'
 args = require './args'
@@ -37,11 +36,12 @@ args = require './args'
       .pipe less()
       .pipe plumber.stop()
       .pipe gulp.dest dir + '/styles'
-      .pipe livereload()
 
   # Compile scripts
   gulp.task 'compile:' + dist + ':scripts', ['clean:build:' + dist], ->
-    excludeHeaderFilter = filter ['**/*', '!**/logger.js', '!**/init.js'], { restore: true }
+    loggerIgnore = fs.readFileSync('./src/.loggerignore', 'utf8')
+      .split('\n').filter((rule) -> !!rule).map((rule) -> '!' + rule.trim())
+    excludeHeaderFilter = filter ['**/*'].concat(loggerIgnore), {restore: true}
     sourceMapHeader = "if (process.type === 'browser') { require('source-map-support').install(); }"
     loggerHeader = [
       "var log = require('common/utils/logger').debugLogger(__filename);"
@@ -75,30 +75,34 @@ args = require './args'
       .pipe rename (path) ->
         path.basename = path.basename.toLowerCase()
       .pipe gulp.dest dir + '/themes'
-      .pipe livereload()
 
   # Move images
   gulp.task 'compile:' + dist + ':images', ['clean:build:' + dist], ->
-    gulp.src [
-      './src/images/**/*.png',
-      './src/images/**/*.jpg'
-    ]
+    gulp.src './src/images/**/*'
       .pipe gulp.dest dir + '/images'
+
+  # Move dictionaries
+  gulp.task 'compile:' + dist + ':dicts', ['clean:build:' + dist], ->
+    gulp.src './src/dicts/**/*'
+      .pipe gulp.dest dir + '/dicts'
 
   # Move html files
   gulp.task 'compile:' + dist + ':html', ['clean:build:' + dist], ->
     gulp.src './src/html/**/*.html'
       .pipe mustache manifest
-      .pipe embedlr
-        src: 'http://localhost:35729/livereload.js?snipver=1'
       .pipe gulp.dest dir + '/html'
-      .pipe livereload()
 
   # Move the node modules
   gulp.task 'compile:' + dist + ':deps', ['clean:build:' + dist], ->
-    gulp.src './src/node_modules/**/*'
+    gulp.src [
+      './src/node_modules/**/*'
+      '!./src/node_modules/**/test*/**'
+      '!./src/node_modules/**/example*/**'
+      '!./src/node_modules/**/changelog*'
+      '!./src/node_modules/**/notice*'
+      '!./src/node_modules/**/readme*'
+    ]
       .pipe gulp.dest dir + '/node_modules'
-      .pipe livereload()
 
   # Move package.json
   gulp.task 'compile:' + dist + ':package', ['clean:build:' + dist], ->
@@ -112,6 +116,7 @@ args = require './args'
     'compile:' + dist + ':scripts'
     'compile:' + dist + ':themes'
     'compile:' + dist + ':images'
+    'compile:' + dist + ':dicts'
     'compile:' + dist + ':html'
     'compile:' + dist + ':deps'
     'compile:' + dist + ':package'

@@ -2,8 +2,8 @@ import prefs from 'common/utils/prefs';
 import {getUserId} from 'common/utils/analytics';
 
 const activeTheme = prefs.get('theme');
-const activeSpellCheckerLang = prefs.get('theme');
-const activeReleaseChannel = prefs.get('theme');
+const activeSpellCheckerLang = prefs.get('spell-checker-language');
+const activeReleaseChannel = prefs.get('updates-channel');
 const trackAnalytics = prefs.get('analytics-track');
 
 let piwikTracker = null;
@@ -16,7 +16,7 @@ if (global.manifest.dev) {
   log('setting up piwik');
 
   // Configure
-  window.piwikAsyncInit = function() {
+  window.piwikAsyncInit = function () {
     try {
       piwikTracker = window.Piwik.getTracker();
       piwikTracker.setDocumentTitle(document.title);
@@ -27,11 +27,11 @@ if (global.manifest.dev) {
       piwikTracker.setCustomDimension(4, activeTheme); // Theme
       piwikTracker.setCustomDimension(5, activeSpellCheckerLang); // Spell Checker Language
       piwikTracker.setUserId(getUserId());
-      piwikTracker.setSiteId(1);
+      piwikTracker.setSiteId(global.manifest.piwik.siteId);
       piwikTracker.trackPageView();
       log('piwik analytics instance created');
     } catch (err) {
-      log(err);
+      logFatal(err);
     }
   };
 
@@ -44,6 +44,6 @@ if (global.manifest.dev) {
   document.head.appendChild(scriptElem);
 }
 
-export function getTracker() {
+export function getTracker () {
   return piwikTracker;
 }

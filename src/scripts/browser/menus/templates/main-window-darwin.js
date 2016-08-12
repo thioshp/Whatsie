@@ -8,20 +8,24 @@ export default {
   submenu: [{
     label: 'Reload',
     accelerator: 'Cmd+R',
+    needsWindow: true,
     click: $.reloadWindow()
   }, {
     label: 'Reset',
     accelerator: 'Cmd+Alt+R',
+    needsWindow: true,
     click: $.resetWindow()
   }, {
     type: 'separator'
   }, {
     type: 'checkbox',
     label: 'Float on Top',
+    accelerator: 'Cmd+Alt+T',
+    needsWindow: true,
     click: $.floatOnTop($.key('checked'))
   }, {
     type: 'checkbox',
-    label: 'Close with Escape',
+    label: 'Close with Escape Key',
     click: $.setPref('close-with-esc', $.key('checked')),
     parse: $.setLocal('checked', $.pref('close-with-esc'))
   }, {
@@ -48,7 +52,7 @@ export default {
     click: $.all(
       $.showInTray($.key('checked')),
       $.updateSibling('show-dock', 'enabled', $.key('checked')),
-      $.updateMenuItem('tray', 'show-tray')($.key('checked'))(checked => $.all(
+      $.updateMenuItem('tray', 'show-tray')($.key('checked'))((checked) => $.all(
         $.setLocal('checked', $.val(checked)),
         $.updateSibling('show-dock', 'enabled', $.val(checked))
       )),
@@ -65,7 +69,7 @@ export default {
     click: $.all(
       $.showInDock($.key('checked')),
       $.updateSibling('show-tray', 'enabled', $.key('checked')),
-      $.updateMenuItem('tray', 'show-dock')($.key('checked'))(checked => $.all(
+      $.updateMenuItem('tray', 'show-dock')($.key('checked'))((checked) => $.all(
         $.setLocal('checked', $.val(checked)),
         $.updateSibling('show-tray', 'enabled', $.val(checked))
       )),
@@ -79,16 +83,10 @@ export default {
   }, {
     type: 'separator'
   }, {
-    label: 'Minimize',
-    accelerator: 'Cmd+M',
     role: 'minimize'
   }, {
-    label: 'Zoom',
-    accelerator: 'Alt+Cmd+Ctrl+M',
-    selector: 'zoom:'
+    role: 'zoom'
   }, {
-    label: 'Close',
-    accelerator: 'Cmd+W',
     role: 'close'
   }]
 };

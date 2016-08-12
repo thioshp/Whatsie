@@ -18,6 +18,13 @@ gulp.task 'build:darwin64', ['resources:darwin', 'compile:darwin64', 'clean:buil
       toPath = './build/darwin64/' + manifest.productName + '.app/Contents/Resources/' + manifest.name + '.icns'
       fs.copy fromPath, toPath, utils.log callback, fromPath, '=>', toPath
 
+    # Copy license files
+    async.apply async.parallel, ['LICENSE', 'LICENSES.chromium.html'].map (fileName) ->
+      (callback) ->
+        fromPath = './build/darwin64/' + fileName
+        toPath = './build/darwin64/' + manifest.productName + '.app/Contents/' + fileName
+        fs.copy fromPath, toPath, utils.log callback, fromPath, '=>', toPath
+
     # Rename the app executable
     (callback) ->
       exeDir = './build/darwin64/' + manifest.productName + '.app/Contents/MacOS/'
@@ -84,7 +91,7 @@ gulp.task 'build:darwin64', ['resources:darwin', 'compile:darwin64', 'clean:buil
       # Move the app's startup.desktop file
       (callback) ->
         fromPath = './build/resources/linux/startup.desktop'
-        toPath = './build/' + dist + '/etc/xdg/autostart/' + manifest.name + '.desktop'
+        toPath = './build/' + dist + '/opt/' + manifest.name + '/resources/app/startup.desktop'
         fs.copy fromPath, toPath, utils.log callback, fromPath, '=>', toPath
 
       # Move icons
@@ -112,7 +119,7 @@ gulp.task 'build:win32', ['resources:win', 'compile:win32', 'clean:build:win32']
         'version-string':
           ProductName: manifest.productName
           CompanyName: manifest.authorName
-          FileDescription: manifest.description
+          FileDescription: manifest.productName
           LegalCopyright: manifest.copyright
           OriginalFilename: manifest.productName + '.exe'
         'file-version': manifest.version

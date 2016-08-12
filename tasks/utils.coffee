@@ -1,6 +1,6 @@
 args = require './args'
 async = require 'async'
-spawn = require 'cross-spawn-async'
+spawn = require 'cross-spawn'
 fs = require 'fs'
 require 'colors'
 
@@ -31,14 +31,20 @@ applySpawn = (cmd, params, opts = {}) ->
       errored = false
       child.on 'error', (err) ->
         errored = true
+        if args.verbose
+          console.log 'finished: spawn', cmd
         cb(err)
       child.on 'close', (code) ->
         unless errored
           if code
             err = new Error "`#{cmd} #{params.join(' ')}` exited with code #{code}"
             err.code = code
+            if args.verbose
+              console.log 'finished: spawn', cmd
             cb err
           else
+            if args.verbose
+              console.log 'finished: spawn', cmd
             cb null
 
 applyIf = (cond, fn) ->
@@ -47,15 +53,15 @@ applyIf = (cond, fn) ->
   else
     (cb) -> cb(null)
 
-platform = () ->
-  if process.platform == 'win32'
+platform = ->
+  if process.platform is 'win32'
     process.platform
   else
-    arch = if process.arch == 'ia32' then '32' else '64'
+    arch = if process.arch is 'ia32' then '32' else '64'
     process.platform + arch
 
-platformOnly = () ->
-  if process.platform == 'win32'
+platformOnly = ->
+  if process.platform is 'win32'
     'win'
   else
     process.platform

@@ -10,4 +10,4 @@ StartupNotify=false
 StartupWMClass={{ name }}
 Keywords={{ keywords }}
 Categories={{ categories }}
-X-GNOME-Autostart-enabled=false
+X-GNOME-UsesNotifications=true
